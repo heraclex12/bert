@@ -866,6 +866,10 @@ def attention_layer(from_tensor,
                                  1.0 / math.sqrt(float(size_per_head)))
 
   if attention_mask is not None:
+    # Look ahead mask
+    if mask_self_attn:
+      attention_mask = tf.linalg.band_part(attention_mask, -1, 0)
+
     # `attention_mask` = [B, 1, F, T]
     attention_mask = tf.expand_dims(attention_mask, axis=[1])
 
