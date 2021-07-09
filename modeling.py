@@ -275,7 +275,7 @@ class BertDecoder(object):
   config = modeling.BertConfig(vocab_size=32000, hidden_size=512,
     num_hidden_layers=8, num_attention_heads=6, intermediate_size=1024)
 
-  model = modeling.BertModel(config=config, is_training=True,
+  model = modeling.BertDecoder(config=config, is_training=True,
     input_ids=input_ids, input_mask=input_mask, token_type_ids=token_type_ids)
 
   label_embeddings = tf.get_variable(...)
@@ -291,9 +291,11 @@ class BertDecoder(object):
                input_ids,
                input_mask=None,
                token_type_ids=None,
+               encoder_output_tensor=None,
+               encoder_attention_mask=None,
                use_one_hot_embeddings=False,
                scope=None):
-    """Constructor for BertModel.
+    """Constructor for BertDecoder.
 
     Args:
       config: `BertConfig` instance.
@@ -350,7 +352,7 @@ class BertDecoder(object):
             max_position_embeddings=config.max_position_embeddings,
             dropout_prob=config.hidden_dropout_prob)
 
-      with tf.variable_scope("encoder"):
+      with tf.variable_scope("decoder"):
         # This converts a 2D mask of shape [batch_size, seq_length] to a 3D
         # mask of shape [batch_size, seq_length, seq_length] which is used
         # for the attention scores.
@@ -359,9 +361,11 @@ class BertDecoder(object):
 
         # Run the stacked transformer.
         # `sequence_output` shape = [batch_size, seq_length, hidden_size].
-        self.all_encoder_layers = transformer_model(
+        self.all_decoder_layers = transformer_model(
             input_tensor=self.embedding_output,
             attention_mask=attention_mask,
+            encoder_output_tensor=encoder_output_tensor,
+            encoder_attention_mask=encoder_attention_mask,
             hidden_size=config.hidden_size,
             num_hidden_layers=config.num_hidden_layers,
             num_attention_heads=config.num_attention_heads,
@@ -370,9 +374,10 @@ class BertDecoder(object):
             hidden_dropout_prob=config.hidden_dropout_prob,
             attention_probs_dropout_prob=config.attention_probs_dropout_prob,
             initializer_range=config.initializer_range,
-            do_return_all_layers=True)
+            do_return_all_layers=True,
+            mask_self_attn=True)
 
-      self.sequence_output = self.all_encoder_layers[-1]
+      self.sequence_output = self.all_decoder_layers[-1]
       # The "pooler" converts the encoded sequence tensor of shape
       # [batch_size, seq_length, hidden_size] to a tensor of shape
       # [batch_size, hidden_size]. This is necessary for segment-level
@@ -401,7 +406,7 @@ class BertDecoder(object):
     return self.sequence_output
 
   def get_all_encoder_layers(self):
-    return self.all_encoder_layers
+    return self.all_decoder_layers
 
   def get_embedding_output(self):
     """Gets output of the embedding lookup (i.e., input to the transformer).
