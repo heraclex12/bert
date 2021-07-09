@@ -729,7 +729,8 @@ def attention_layer(from_tensor,
                     do_return_2d_tensor=False,
                     batch_size=None,
                     from_seq_length=None,
-                    to_seq_length=None):
+                    to_seq_length=None,
+                    mask_self_attn=False):
   """Performs multi-headed attention from `from_tensor` to `to_tensor`.
 
   This is an implementation of multi-headed attention based on "Attention
@@ -974,6 +975,10 @@ def transformer_model(input_tensor,
   seq_length = input_shape[1]
   input_width = input_shape[2]
 
+  encoder_output_shape = get_shape_list(encoder_output_tensor, expected_rank=3)
+  encoder_output_seq_length = encoder_output_shape[1]
+  encoder_output_width = encoder_output_shape[2]
+
   # The Transformer performs sum residuals on all layers so the input needs
   # to be the same as the hidden size.
   if input_width != hidden_size:
@@ -1005,7 +1010,8 @@ def transformer_model(input_tensor,
               do_return_2d_tensor=True,
               batch_size=batch_size,
               from_seq_length=seq_length,
-              to_seq_length=seq_length)
+              to_seq_length=seq_length,
+              mask_self_attn=mask_self_attn)
           attention_heads.append(attention_head)
 
         attention_output = None
@@ -1031,7 +1037,7 @@ def transformer_model(input_tensor,
           attention_heads = []
           with tf.variable_scope("self"):
             attention_head = attention_layer(
-                from_tensor=layer_input,
+                from_tensor=attention_output,
                 to_tensor=encoder_output_tensor,
                 attention_mask=encoder_attention_mask,
                 num_attention_heads=num_attention_heads,
@@ -1041,7 +1047,7 @@ def transformer_model(input_tensor,
                 do_return_2d_tensor=True,
                 batch_size=batch_size,
                 from_seq_length=seq_length,
-                to_seq_length=seq_length)
+                to_seq_length=encoder_output_seq_length)
             attention_heads.append(attention_head)
 
           attention_output = None
