@@ -358,6 +358,8 @@ class BertDecoder(object):
         # for the attention scores.
         attention_mask = create_attention_mask_from_input_mask(
             input_ids, input_mask)
+        encoder_attention_mask = create_attention_mask_from_input_mask(
+            input_ids, encoder_attention_mask)
 
         # Run the stacked transformer.
         # `sequence_output` shape = [batch_size, seq_length, hidden_size].
