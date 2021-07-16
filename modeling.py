@@ -979,9 +979,10 @@ def transformer_model(input_tensor,
   seq_length = input_shape[1]
   input_width = input_shape[2]
 
-  encoder_output_shape = get_shape_list(encoder_output_tensor, expected_rank=3)
-  encoder_output_seq_length = encoder_output_shape[1]
-  encoder_output_width = encoder_output_shape[2]
+  if encoder_output_tensor is not None:
+    encoder_output_shape = get_shape_list(encoder_output_tensor, expected_rank=3)
+    encoder_output_seq_length = encoder_output_shape[1]
+    encoder_output_width = encoder_output_shape[2]
 
   # The Transformer performs sum residuals on all layers so the input needs
   # to be the same as the hidden size.
