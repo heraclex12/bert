@@ -104,7 +104,7 @@ class BertConfig(object):
     return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
 
 
-class BertModel(object):
+class BertEncoder(object):
   """BERT model ("Bidirectional Encoder Representations from Transformers").
 
   Example usage:
@@ -801,6 +801,8 @@ def attention_layer(from_tensor,
   to_shape = get_shape_list(to_tensor, expected_rank=[2, 3])
 
   if len(from_shape) != len(to_shape):
+    print('from', from_shape)
+    print('to', to_shape)
     raise ValueError(
         "The rank of `from_tensor` must match the rank of `to_tensor`.")
 
@@ -983,6 +985,7 @@ def transformer_model(input_tensor,
     encoder_output_shape = get_shape_list(encoder_output_tensor, expected_rank=3)
     encoder_output_seq_length = encoder_output_shape[1]
     encoder_output_width = encoder_output_shape[2]
+    encoder_output_tensor = reshape_to_matrix(encoder_output_tensor)
 
   # The Transformer performs sum residuals on all layers so the input needs
   # to be the same as the hidden size.
