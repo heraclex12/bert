@@ -118,7 +118,7 @@ class BertEncoder(object):
   config = modeling.BertConfig(vocab_size=32000, hidden_size=512,
     num_hidden_layers=8, num_attention_heads=6, intermediate_size=1024)
 
-  model = modeling.BertModel(config=config, is_training=True,
+  model = modeling.BertEncoder(config=config, is_training=True,
     input_ids=input_ids, input_mask=input_mask, token_type_ids=token_type_ids)
 
   label_embeddings = tf.get_variable(...)
@@ -262,7 +262,7 @@ class BertEncoder(object):
 
 
 class BertDecoder(object):
-  """BERT model ("Bidirectional Encoder Representations from Transformers").
+  """Causal Language BERT model ("Bidirectional Encoder Representations from Transformers").
 
   Example usage:
 
@@ -304,6 +304,8 @@ class BertDecoder(object):
       input_ids: int32 Tensor of shape [batch_size, seq_length].
       input_mask: (optional) int32 Tensor of shape [batch_size, seq_length].
       token_type_ids: (optional) int32 Tensor of shape [batch_size, seq_length].
+      encoder_output_tensor: (optional) float32 Tensor of shape [batch_size, seq_length, hidden_size].
+      encoder_attention_mask: (optional) int32 Tensor of shape [batch_size, seq_length].
       use_one_hot_embeddings: (optional) bool. Whether to use one-hot word
         embeddings or tf.embedding_lookup() for the word embeddings.
       scope: (optional) variable scope. Defaults to "bert".
@@ -327,7 +329,7 @@ class BertDecoder(object):
     if token_type_ids is None:
       token_type_ids = tf.zeros(shape=[batch_size, seq_length], dtype=tf.int32)
 
-    with tf.variable_scope(scope, default_name="gpt"):
+    with tf.variable_scope(scope, default_name="bertclm"):
       with tf.variable_scope("embeddings"):
         # Perform embedding lookup on the word ids.
         (self.embedding_output, self.embedding_table) = embedding_lookup(
@@ -948,6 +950,8 @@ def transformer_model(input_tensor,
     attention_mask: (optional) int32 Tensor of shape [batch_size, seq_length,
       seq_length], with 1 for positions that can be attended to and 0 in
       positions that should not be.
+    encoder_output_tensor: (optional) float Tensor of shape [batch_size, seq_length, hidden_size].
+    encoder_attention_mask: (optional) int32 Tensor of shape [batch_size, seq_length, seq_length].
     hidden_size: int. Hidden size of the Transformer.
     num_hidden_layers: int. Number of layers (blocks) in the Transformer.
     num_attention_heads: int. Number of attention heads in the Transformer.
