@@ -1,5 +1,9 @@
 # BERT
 
+**\*\*\*\*\* New August 25th, 2021:  \*\*\*\*\***
+
+I have added BERT for decoder (BERTDecoder) in my own repository, and I have changed BERTModel into BERTEncoder as well. With these new changes, you are able to apply them for encoder-decoder architecture like BERT2BERT. The BERTDecoder's architeture is the same as GPT2.
+
 **\*\*\*\*\* New March 11th, 2020: Smaller BERT Models \*\*\*\*\***
 
 This is a release of 24 smaller BERT models (English only, uncased, trained with WordPiece masking) referenced in [Well-Read Students Learn Better: On the Importance of Pre-training Compact Models](https://arxiv.org/abs/1908.08962).
